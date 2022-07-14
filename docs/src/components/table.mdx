@@ -1,0 +1,19 @@
+```mdx-code-block
+<Fragment dangerouslySetInnerHTML={{__html:props.table.split(/\n+/).map((el) => `<p>${el}</p>`).join("")}}></Fragment>
+```
+
+```mdx-code-block
+<Fragment>
+hola
+mundo
+</Fragment>
+```
+
+Uses DCS issue API.
+
+**Kind**: global react-hook
+
+| Param | Type | Description |
+| --- | --- | --- |
+| props | <code>Object</code> | hook props |
+| props.token | <code>string</code> | Token needed to make secure requests. |

@@ -1,0 +1,84 @@
+---
+sidebar_position: 1
+slug: /
+title: Introduction
+---
+
+**dcs-react-hooks** is an RHL (React Hooks Library) to streamline data fetching from [**DCS** (Door43 Content Service)](https://git.door43.org/about), a *Github*-like Git repository hosting service for open-licensed Biblical content.
+
+It provides two group of hooks:
+
+- **Client Hooks**, return [**dcs-js**](https://github.com/unfoldingWord/dcs-js) classes instances (Clients) that will allow you to take advantage of their methods to fetch data from DCS.
+- **Request Hooks**, return *state* and *actions* directly from a DCS API paths. It will allow you to get state right-away and the actions needed to manipulate that state data both locally and remotely.
+
+## Getting Started
+
+To get started **run the following** inside your React project directory:
+
+```bash
+yarn add dcs-react-hooks
+```
+
+Or with npm:
+
+```bash
+npm install dcs-react-hooks
+```
+
+## Quick start
+
+**Client hooks** and **Request hooks** can be used to produce the same result, in this example we'll fetch a list of all Organizations from DCS, using both Client and Request hooks.
+
+We'll use a library called `react-json-view` to better see the results of the requests examples.
+
+### The Client Hooks way
+
+Start by importing the `useOrgClient` hook:
+
+```js
+import ReactJson from 'react-json-view';
+// highlight-next-line
+import { useOrgClient } from "dcs-react-hooks"
+```
+
+Then create a React Component for fetching all organizations from DCS and displaying the data.
+
+```jsx live
+function OrgClientJson(){
+  const orgClient = useOrgClient({});
+  const [orgs, setOrgs] = useState({});
+
+  useEffect(async () => {
+    const _orgs = await orgClient.orgGetAll().then(({ data }) => data)
+    setOrgs(_orgs)
+  },[]);
+
+  return(
+    <JsonView src={orgs} />
+  )
+}
+```
+
+You can see a complete list of the available parameters for the `orgGetAll` method in the [dcs-js documentation](https://github.com/unfoldingWord/dcs-js/blob/master/documentation/classes/OrganizationApi.md#orggetall).
+
+### The Request Hooks way
+
+Start by importing the `useAllOrgs` hook:
+
+```js
+import ReactJson from 'react-json-view';
+// highlight-next-line
+import { useAllOrgs } from "dcs-react-hooks"
+```
+
+Then create a React Component for fetching all organizations from DCS and displaying the data.
+
+```jsx live
+function OrgRequestJson(){
+  const {state, actions} = useAllOrgs({});
+
+  return(
+    <JsonView src={{state,actions}} />
+  )
+}
+```

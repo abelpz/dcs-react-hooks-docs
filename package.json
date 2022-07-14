@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "workspaces":[
+    "library",
+    "docs"
+  ],
+  "scripts": {
+    "build": "yarn workspace dcs-react-hooks vite build"
+  }
+}
