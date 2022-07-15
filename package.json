@@ -1,6 +1,7 @@
 {
+  "name": "dcs-react-hooks-docs-test",
   "private": true,
-  "workspaces":[
+  "workspaces": [
     "library",
     "docs"
   ],

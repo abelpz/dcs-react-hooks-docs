@@ -1,6 +1,6 @@
 import useSwr from 'swr';
 import { useOrgClient } from '@hooks/clients/useOrgClient';
-import { useAuthentication } from '@hooks/user/useAuthentication';
+import { useAuthentication } from '@hooks/requests/user/useAuthentication';
 
 export function useAllOrgs({ organizationClient, options, configuration, axios }) {
   const { state: { token } } = useAuthentication({});
