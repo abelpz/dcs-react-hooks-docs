@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types';
-import { NotificationApi, Configuration } from "dcs-js";
-import { AxiosInstance } from "axios";
-import { getApiConfig } from "@helpers/api";
+import {NotificationApi, Configuration} from "dcs-js";
+import {AxiosInstance} from "axios";
+import {getApiConfig} from "@helpers/api";
+
+/**
+ * A number, or a string containing a number.
+ * @typedef {(number|string)} NumberLike
+ */
 
 /**
  * @callback apiKeyCallback
@@ -11,37 +16,35 @@ import { getApiConfig } from "@helpers/api";
 
 /**
  * Uses NotificationApi from dcs-js.
- * @param {Object} [params] - list of arguments
- * @param {string} params.token - dcs authentication token
- * @param {string} params.basePath - override requests base path
- * @param {NotificationApi} params.notifClient - NotificationApi instance
- * @param {AxiosInstance} params.axios - a custom axios instance to use to make requests
- * @param {Configuration} params.configuration - a configuration object
- * @param {string|Promise<string>|apiKeyCallback} params.configuration.apiKey - a string or a callback function returning the apiKey depending on authentication type.
- * @param {string} params.configuration.username - the user name for basic authentication.
- * @param {string} params.configuration.password - the user password for basic authentication.
- * @param {string} params.configuration.basePath - override requests base path
- * @param {} params.configuration.baseOptions -base options for axios calls
+ * @arg {Object} [params] - list of arguments
+ * @arg {string} params.token - dcs authentication token
+ * @arg {string} params.basePath - override requests base path
+ * @arg {NotificationApi} params.notifClient - NotificationApi instance
+ * @arg {AxiosInstance} params.axios - a custom axios instance to use to make requests
+ * @arg {Configuration} params.configuration - a configuration object
+ * @arg {string|Promise<string>|apiKeyCallback} params.configuration.apiKey - a string or a callback function returning the apiKey depending on authentication type.
+ * @arg {string} params.configuration.username - the user name for basic authentication.
+ * @arg {string} params.configuration.password - the user password for basic authentication.
+ * @arg {string} params.configuration.basePath - override requests base path
+ * @arg {NumberLike} params.configuration.baseOptions -base options for axios calls
  * @return {NotificationApi} new NotificationApi instance
 */
-export const useNotifClient = ({ token, basePath, notifClient, axios, configuration } = {}) => {
-  if (notifClient instanceof NotificationApi) return notifClient;
-  const _configuration = getApiConfig({ token, ...configuration, basePath });
+export const useNotifClient = ({
+  token,
+  basePath,
+  notifClient,
+  axios,
+  configuration
+} = {}) => {
+  if (notifClient instanceof NotificationApi) 
+    return notifClient;
+  /**
+   * configuration parameter
+   */
+  const _configuration = getApiConfig({
+    token,
+    ...configuration,
+    basePath
+  });
   return new NotificationApi(_configuration, _configuration.basePath, axios);
 };
-
-// useNotifClient.propTypes = {
-//   token: PropTypes.string,
-//   basePath: PropTypes.string,
-//   notifClient: PropTypes.instanceOf(NotificationApi),
-//   axios: PropTypes.instanceOf(AxiosInstance),
-//   /** *dcs-js* instance config */
-//   configuration: PropTypes.shape({
-//     apiKey: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.instanceOf(Promise)]),
-//     username: PropTypes.string,
-//     password: PropTypes.string,
-//     accessToken: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.instanceOf(Promise)]),
-//     basePath: PropTypes.string,
-//     baseOptions: PropTypes.object,
-//   })
-// };

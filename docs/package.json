@@ -11,9 +11,7 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids",
-    "postinstall": "yarn workspace dcs-react-hooks build",
-    "netlify:build": "yarn workspace dcs-react-hooks build && docusaurus build"
+    "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
     "@docusaurus/core": "^2.0.0-rc.1",

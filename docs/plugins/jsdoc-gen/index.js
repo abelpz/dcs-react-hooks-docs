@@ -1,7 +1,65 @@
 const child_process = require('child_process');
 const path = require('node:path');
 const glob = require('glob');
-const jsdoc2md = require('jsdoc-to-markdown')
+
+const fetchFiles = (docs) => docs.reduce((files, doc) => {
+  const fileName = doc.meta?.filename.split('.')[0].toLowerCase();
+  if (!fileName) return files;
+  if (["function","constant"].includes(doc.kind) &&  doc.scope === 'global' && /^use[A-Z]/.test(doc.name)) doc.kind = 'react-hook';
+  if (!files[fileName]) files[fileName] = {};
+
+  if (doc.undocumented) {
+    if (files[fileName].extras) {
+      files[fileName].extras.push(doc);
+    }
+    else {
+      files[fileName].extras = [doc]
+    }
+    return files
+  };
+
+  const target = doc.kind === "typedef" ? "types" : "data";
+  if (files[fileName][target]) {
+    files[fileName][target].push(doc);
+  }
+  else {
+    files[fileName][target] = [doc];
+  }
+  return files;
+}, {})
+
+const fetchElements = (docs) => docs.reduce((elements, doc) => {
+  if (!doc.comment) return elements;
+  const { functions, types } = elements;
+
+  const docPath = path.resolve(doc.meta.path, doc.meta.filename);
+
+  if (doc.kind == 'typedef') {
+    if (types[doc.name])
+      console.warn("\u001B[93m", `Duplicated typedef '${doc.name}'\n  in '${types[doc.name].path}'\n  and '${docPath}'.\n skipping...`, "\u001B[0m");
+    types[doc.name] ??= { data: doc, path: docPath };
+    return { functions, types };
+  }
+
+  const isMember = !!doc.memberof;
+  const name = isMember ? doc.memberof.split("~")[0] : doc.name;
+
+  if (isMember) {
+    functions[name]?.members?.push(doc);
+    return { functions, types };
+  }
+
+  functions[name] ??= { data: null, members: [], path: docPath };
+
+  if (functions[name].data)
+    console.warn("\u001B[93m", `Duplicated '${doc.name}'\n  in '${functions[name].path}'\n  and '${docPath}'.\n skipping...`, "\u001B[0m");
+
+  if (["function", "constant"].includes(doc.kind) && /^use[A-Z]/.test(doc.name)) doc.kind = 'react-hook';
+
+  functions[name].data ??= doc;
+
+  return {functions,types};
+},{functions: {},types: {}})
 
 module.exports = function (context, options) {
   const { src } = options;
@@ -13,51 +71,22 @@ module.exports = function (context, options) {
       return [`${contentPath}`].concat(srcPaths);
     },
     async loadContent() {
-      console.log("Generating jsdocs");
+      console.log("\u001B[4m","Generating jsdocs", "\u001B[0m");
 
       const files = Array.isArray(src)
         ? src.reduce((files, src) => files.concat(glob.sync(src)), [])
         : glob.sync(src);
       
-      console.log({ files });
+      const docs = files.reduce((docs, file) => docs.concat(JSON.parse(child_process.execSync(`jsdoc -X -r ${file}`, { encoding: 'utf8' }))), [])
       
-      const jsdoc = files
-        .reduce((docs, file) => docs.concat(JSON.parse(child_process.execSync(`jsdoc -X -r ${file}`, { encoding: 'utf8' }))), [])
-        .reduce((functions, entry) => {
-          if (!entry.comment) return functions;
 
-          const nameArray = entry.longname.split('.');
-
-          if (nameArray.includes('propTypes') || (nameArray.length === 1 && entry.kind === 'member')) return functions;
-
-          if (nameArray.length === 1 && /^use[A-Z]/.test(nameArray[0])) entry.kind = 'react-hook';
-
-          entry.id = entry.longname;
-          const name = nameArray[0].toLowerCase();
-          const md = jsdoc2md.renderSync({
-            data: [entry],
-            template: `{{#orphans ~}}{{>body~}}{{>member-index~}}{{>separator~}}{{>members~}}{{/orphans~}}`,
-            "param-list-format": "table"
-          });
-
-          if (Array.isArray(functions[name]?.data)) {
-            functions[name].data.push(entry);
-          }
-          else {
-            functions[name] = {data: [entry]};
-          }
-
-          functions[name].md = md;
-
-          return functions;
-        }, {})
-      
-      return { jsdoc }
+      return { jsdoc: fetchElements(docs) }
     },
     async contentLoaded({ content, actions }) {
-      const { setGlobalData } = actions;
+      const { createData } = actions;
       const { jsdoc } = content;
-      setGlobalData({ docs:jsdoc });
+      const docusaurusData = await createData('dataJson.json',JSON.stringify(jsdoc));
+      // setGlobalData({ docs:jsdoc });
       console.log("\u001B[32m", "✔ Package docs generated", "\u001B[0m");
     }
   }

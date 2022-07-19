@@ -47,7 +47,7 @@ const config = {
     [
       path.resolve(__dirname, 'plugins', 'jsdoc-gen'),
       {
-        src: ['./docs/hooks/','../library/src/hooks/']
+        src: ['../library/src/hooks/']
       }
     ]
   ],
